@@ -1,0 +1,44 @@
+html, body {
+    font-family:sans-serif;
+}
+
+.col {
+    width: 20px;
+    height:20px;
+    min-width:20px;
+    border:1px solid #ccc;
+    display:inline-block;
+    margin-right:1px;
+}
+.row {
+    height:20px;
+    white-space: nowrap;
+    margin:3px;
+}
+.col:hover {
+    background-color:#efefef;
+}
+.col.checked {
+    background-color:#333;
+    border-color:#333;
+}
+
+ul.tabs li {
+    float:left;
+    list-style-type: none;
+    margin-right:.5em;
+    padding:0.25em;
+    border:1px solid #ccc;
+    margin-bottom:1em;
+}
+ul.tabs li a {
+    text-decoration:none;
+    color:steelblue;
+}
+ul.tabs li:hover {
+    background-color:#efefef;
+}
+ul.tabs {
+    margin:0;
+    padding:0;
+}

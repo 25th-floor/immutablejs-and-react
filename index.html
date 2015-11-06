@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>Immutable.js and React</title>
+
+    <meta name="description" content="react and immutable.js">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+        <section>
+          <h1>Immutable.js and React</h1>
+          <p>
+            <small>
+              S. Oestreicher <a href="http://twitter.com/thinkfunctional">@thinkfunctional</a>
+              <br>
+              A. Sharif <a href="http://twitter.com/sharifsbeat">@sharifsbeat</a>
+            </small>
+          </p>
+        </section>
+
+        <section>
+          <h1>What we do</h1>
+          <h3>25th-floor</h3>
+          <ul>
+            <li>Agile, Scrum, Self-organization, Team Culture</li>
+            <li>React, AngularJS</li>
+            <li>XP, Pair, Mob Programming etc.</li>
+            <li>Consulting, Workshops etc.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h1>Why Immutability</h1>
+          <ul>
+            <li>Problems with AngularJS</li>
+            <li>Data being mutated, hard to control and debug</li>
+            <li>State everywhere</li>
+            <li>Side effects out of control</li>
+            <li>Data consistency nightmare</li>
+          </ul>
+        </section>
+
+        <section>
+          <h1>Basics</h1>
+          <pre><code class="hljs">var foo = 'Some String';
+var bar = foo.substr(1, 3);</code></pre>
+          <p>
+          JavaScript Strings are immutable.
+          </p>
+        </section>
+
+        <section>
+          <h1>Basics</h1>
+					<h3>Mutability is hard</h3>
+          <pre><code class="hljs">function top(n, xs) {
+  xs.sort().reverse();
+  return xs.slice(0, n);
+}
+
+// somewhere else
+let xs = [4, 1, 3, 2, 5];
+let top3 = top(3, xs);
+// oops, xs has been changed!
+// Do I need to make a copy? Should "top" make a copy?
+</code></pre>
+        </section>
+
+
+        <section>
+          <h1>Basics</h1>
+					<h3>Mutability is hard</h3>
+          <pre><code class="hljs">let now = moment();
+let startOfWeek = now.startOf('week');
+let endOfWeek = now.endOf('week');
+
+now.format('YYYY-MM-DD');          // => 2015-11-07
+startOfWeek.format('YYYY-MM-DD');  // => 2015-11-07
+endOfWeek.format('YYYY-MM-DD');    // => 2015-11-07
+
+// we have to remember to make a copy every time!
+let now = moment();
+let startOfWeek = now.clone().startOf('week');
+let endOfWeek = now.clone().endOf('week');
+</code></pre>
+        </section>
+
+        <section>
+          <h1>Basics</h1>
+          <ul>
+            <li>The support of an efficient change detection by using <code>===</code> operator to compare objects.</li>
+            <li>If the objects are identical you can be sure that nothing has changed.</li>
+          </ul>
+        </section>
+
+        <section data-background="./img/immutable.png">
+
+        </section>
+
+        <section>
+          <h1>Structural Sharing</h1>
+          <img src="img/struct-sharing.png">
+          <p><small>"Purely functional tree, after" by VineetKumar at English Wikipedia</small></p>
+        </section>
+
+        <section>
+          <h1>Immutable.js / API</h1>
+          <strong>Immutable.fromJS()</strong>
+          <pre><code>Immutable.fromJS([{a:1}, {b:2}])</code></pre>
+
+          <strong>get()</strong>
+          <pre><code class="hljs">let map = Immutable.fromJS({foo: {bar: 1}});
+map.get('foo').get('bar'); //instead of map.foo.bar </code></pre>
+          <strong>Immutable.is()</strong>
+          <pre><code class="hljs">Immutable.is(this.props.cols, nextProps.cols);</code></pre>
+        </section>
+
+        <section>
+          <h1>Immutable.js / API</h1>
+          <strong><code>updateIn()</code></strong>
+          <pre><code>rows.updateIn([row, 'cols', col, 'active'], active => !active);</code></pre>
+          <strong>setIn()</strong>
+          <pre><code>rows.setIn([row, 'cols', col, 'active'], false);</code></pre>
+          <strong>mergeDeep()</strong>
+          <pre><code>var x = Immutable.fromJS({a: { x: 10, y: 10 }, b: { x: 20, y: 50 } });
+var y = Immutable.fromJS({a: { x: 2 }, b: { y: 5 }, c: { z: 3 } });
+x.mergeDeep(y) // {a: { x: 2, y: 10 }, b: { x: 20, y: 5 }, c: { z: 3 } }</code></pre>
+        </section>
+
+				<section>
+					<h1>Immutable.js / API</h1>
+					<h3>All the usual suspects</h3>
+					<ul>
+						<li>filter</li>
+						<li>map</li>
+						<li>reduce</li>
+						<li>some</li>
+						<li>every</li>
+						<li>groupBy</li>
+						<li>find</li>
+						<li>&hellip;</li>
+					</ul>
+				</section>
+
+        <section>
+          <h1>React</h1>
+
+          <h3>shouldComponentUpdate</h3>
+          <p>The secret sauce of why ClojureScript React wrappers are faster than vanilla React.</p>
+        </section>
+
+        <section>
+          <h1>React</h1>
+
+          <h3>PureRendererMixin</h3>
+          <p>Useful, but you should prefer your own implementation to leverage Immutable.is</p>
+          <pre><code class="hljs">var a = Immutable.List([1,2]);
+var b = Immutable.List([1,2]);
+a === b; // => false
+Immutable.is(a, b); // => true</code></pre>
+        </section>
+
+        <section>
+          <h1>React Flux, Redux</h1>
+          <p>
+          </p>
+        </section>
+
+        <section>
+          <h1>Serialization</h1>
+          <pre><code class="hljs">var map = Immutable.Map();
+
+map = map.set(Immutable.Map({foo:'bar'}), 'foobar');
+
+map.get(Immutable.Map({foo:'bar'}));
+// => 'foobar'
+
+map.toJSON();
+// => {"[object Object]": "foobar"}
+
+// sad :-(</code></pre>
+        </section>
+
+        <section>
+          <h1>Transit.js</h1>
+          <h3>writer</h3>
+          <pre><code class="hljs">function handle(what) {
+  return transit.makeWriteHandler({
+    tag: v => what,
+    rep: v => v,
+    stringRep: v => null
+  });
+}
+
+var writer = transit.writer("json-verbose", {
+  handlers: transit.map([
+    Immutable.List, handle('array'),
+    Immutable.Map, handle('map')
+  ])
+});</code></pre>
+        </section>
+
+        <section>
+          <h1>Transit.js</h1>
+          <h3>reader</h3>
+          <pre><code class="hljs" style="font-size:14px">var reader = transit.reader("json", {
+    arrayBuilder: {
+        init: function(node) { return Immutable.List().asMutable(); },
+        add: function(ret, val, node) { return ret.push(val); },
+        finalize: function(ret, node) { return ret.asImmutable(); },
+        fromArray: function(arr, node) {
+            return Immutable.List.from(arr);
+        }
+    },
+    mapBuilder: {
+        init: function(node) { return Immutable.Map().asMutable(); },
+        add: function(ret, key, val, node) { return ret.set(key, val); },
+        finalize: function(ret, node) { return ret.asImmutable(); }
+    }
+});</code></pre>
+        </section>
+
+
+
+        <section>
+          <h1>Pros and Cons</h1>
+          <h3>When?</h3>
+          <ul>
+            <li>Simple change detection</li>
+            <li>No defensive copies</li>
+						<li>Trivial undo/redo</li>
+						<li>Share data freely</li>
+          </ul>
+        </section>
+
+        <section>
+          <h1>Pros and Cons</h1>
+          <h3>What are the trade offs?</h3>
+          <ul>
+            <li>Mixed mutable and immutable is a headache
+            <li>ImmutableJS doesn’t play with others (e.g. lodash)
+            <li>Won’t help with other mutable libraries (e.g. momentjs)
+          </ul>
+        </section>
+
+        <section>
+          <h1>Demo</h1>
+          <p>Demo Time!</p>
+        </section>
+        <section>
+          <h1>Q&A</h1>
+        </section>
+
+        <section>
+          <h1>Thanks</h1>
+          <blockquote>
+            &ldquo;No man can step into the same river twice.&rdquo;
+          </blockquote>
+        </section>
+      </div>
+
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'plugin/zoom-js/zoom.js', async: true },
+          { src: 'plugin/notes/notes.js', async: true }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>
